@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Text;
-using Nancy;
 using Nancy.Hosting.Self;
 
-namespace Server
+namespace GameServer
 {
-    class Program
+    class MainClass
     {
         private static readonly String exitCode = "exit()";
 
