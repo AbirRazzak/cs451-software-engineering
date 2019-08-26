@@ -33,7 +33,7 @@ namespace Client
         public int currentRow { get; set; }
         public int currentCol { get; set; }
 
-        private string color;
+        public string color { get; set; }
 
         //A piece on the grid is shown as a button textured from a picture of a checkers piece
         public Button piece { get; set; }
@@ -78,27 +78,6 @@ namespace Client
             }
             return null;
         }
-        /* Gets the possible moves for a piece
-         * At the moment, this function returns the 1 or 2 spots that a piece can move to even if they are occupied
-         */
-        public List<Point> getPossibleMoves()
-        {
-            List<Point> possibleMoves = new List<Point>();
-            int rowMovement;
-            if (color == "Black")
-                rowMovement = -1;
-            else
-                rowMovement = 1;
-            int newRow = currentRow + rowMovement;
-            if (newRow >= 0 && newRow <= 7)
-            {
-                if (currentCol - 1 >= 0)
-                    possibleMoves.Add(new Point(newRow, currentCol - 1));
-                if (currentCol + 1 <= 7)
-                    possibleMoves.Add(new Point(newRow, currentCol + 1));
-            }
-            return possibleMoves;
-        }
     }
     public class CheckersBoard
     {
@@ -107,11 +86,14 @@ namespace Client
         public Piece[] RedPieces { get; set; }
         public Piece SelectedPiece { get; set; }
         //Grid spaces that are highlighted when a piece is selected
-        private List<Point> Highlighted;
+        private List<StackPanel> Highlighted;
+
+        private Dictionary<Point, List<StackPanel>> CaptureMoves;
 
         public CheckersBoard(UniformGrid checkersGrid)
         {
             this.CheckersGrid = checkersGrid;
+            Highlighted = new List<StackPanel>();
             MakeBoard();
         }
         /* Initalize the board by adding panels to the grid
@@ -150,32 +132,153 @@ namespace Client
         {
 
             Button piece = (Button)sender;
+            CaptureMoves = new Dictionary<Point, List<StackPanel>>();
+            RemoveHighlight();
+            
 
             //Get possible move locations for the slected piece
-            List<Point> moves;
+            List<StackPanel> moves;
             SelectedPiece = getPiece((Button)sender);
-            moves = SelectedPiece.getPossibleMoves();
+            moves = getPossibleMoves();
 
             //Remove previously highlighted spaces
-            RemoveHighlight();
-            Highlighted = new List<Point>();
+            
+            
 
             //Add a button to highlight the move location if there isn't a piece there already and bind it to Move function
-            foreach (Point move in moves)
+            foreach (StackPanel stackPanel in moves)
             {
-                StackPanel stackPanel = (StackPanel)GetGridElement(CheckersGrid, (int)move.X, (int)move.Y);
+                //StackPanel stackPanel = (StackPanel)GetGridElement(CheckersGrid, (int)move.X, (int)move.Y);
                 //Check is a piece exists in the spot
-                if (stackPanel.Children.Count == 0)
-                {
+                //if (stackPanel.Children.Count == 0)
+                //{
                     Button possibleMove = new Button();
                     possibleMove.Click += new RoutedEventHandler(Move);
                     possibleMove.Height = 60;
                     possibleMove.Width = 60;
                     possibleMove.Background = Brushes.Yellow;
                     stackPanel.Children.Add(possibleMove);
-                    Highlighted.Add(move);
+                    Highlighted.Add(stackPanel);
+            }
+        }
+
+        /* Gets all possible moves for a piece and return the locations for those moves*/
+        public List<StackPanel> getPossibleMoves()
+        {
+            List<StackPanel> possibleMoves;
+            int rowMovement;
+
+            if (SelectedPiece.color == "Black")
+                rowMovement = -1;
+            else
+                rowMovement = 1;
+
+            possibleMoves = MoveHelper(rowMovement, SelectedPiece.currentRow, SelectedPiece.currentCol);
+
+            return possibleMoves;
+        }
+
+        /* Helper function for generation move list
+         * Check diagonal block to determine if piece can move there and calls helper function to find jump spots
+         */
+        private List<StackPanel> MoveHelper(int increment, int row, int col)
+        {
+            List<StackPanel> possibleMoves = new List<StackPanel>();
+            int newRow = row + increment;
+            if (newRow >= 0 && newRow <= 7)
+            {
+                if (col - 1 >= 0) { 
+                    StackPanel leftPanel = (StackPanel)GetGridElement(CheckersGrid, newRow, col - 1);
+                    if(leftPanel.Children.Count == 0)
+                        possibleMoves.Add(leftPanel);
+                }
+                if (col + 1 <= 7)
+                {
+                    StackPanel rightPanel = (StackPanel)GetGridElement(CheckersGrid, newRow, col + 1);
+                    if (rightPanel.Children.Count == 0)
+                        possibleMoves.Add(rightPanel);
+                }
+                possibleMoves.AddRange(GetJumps(increment, row, col));
+            }
+            return possibleMoves;
+        }
+        /* Get all the locations a piece can jump to */
+        private List<StackPanel> GetJumps(int rowIncrement, int row, int col)
+        {
+            List<StackPanel> possibleMoves = new List<StackPanel>();
+            if (col - 1 >= 0 && row + rowIncrement >= 0 && row + rowIncrement <= 7)
+            {
+                StackPanel leftPanel = (StackPanel)GetGridElement(CheckersGrid, row + rowIncrement, col - 1);
+                possibleMoves.AddRange(GetJumpsHelper(leftPanel, rowIncrement * 2, -2, row, col));
+            }
+            if (col + 1 <= 7 && row + rowIncrement >= 0 && row + rowIncrement <= 7) { 
+                StackPanel rightPanel = (StackPanel)GetGridElement(CheckersGrid, row + rowIncrement, col + 1);
+                possibleMoves.AddRange(GetJumpsHelper(rightPanel, rowIncrement * 2, 2, row, col));
+            }
+            return possibleMoves;
+        }
+
+        /* Helper function for GetJumps that recursively calculates jumps and multiple jumps */
+        private List<StackPanel> GetJumpsHelper(StackPanel panel, int rowIncrement, int columnIncrement, int row, int col)
+        {
+            List<StackPanel> possibleMoves = new List<StackPanel>();
+            if (panel.Children.Count != 0)
+            {
+                //Check is piece is an enemy piece to proceed forward and determine if they can be jumped over
+                Button howCanHeJump = (Button)panel.Children[0];
+                Piece jumpable = getPiece(howCanHeJump);
+                if (jumpable.color != SelectedPiece.color)
+                {
+                    //Get all the jump locations
+                    List<StackPanel> moves = CalculateJump(rowIncrement, columnIncrement, row, col);
+                    List<StackPanel> capturable = new List<StackPanel>();
+                    foreach (StackPanel move in moves)
+                    {
+                        Point np = new Point(Grid.GetRow(move), Grid.GetColumn(move));
+                        
+                        //Add all capturable pieces to the Dictionary to allow capturing multiple enemy pieces in one move
+                        List<StackPanel> previous = new List<StackPanel>();
+                        foreach (KeyValuePair<Point, List<StackPanel>> entry in CaptureMoves)
+                        {
+                            if (entry.Key.Equals(np))
+                            {
+                                previous = entry.Value;
+                            }
+                        }
+                        if (previous.Count != 0)
+                        {
+                            previous.Add(panel);
+                        }
+                    }
+                    //Add move entry to Dictionary
+                    if (moves.Count > 0)
+                    {
+                        StackPanel testPanel = moves[0];
+                        
+                        Point testPoint = new Point(Grid.GetRow(testPanel), Grid.GetColumn(testPanel));
+                        capturable.Add(panel);
+                        CaptureMoves.Add(testPoint, capturable);
+                    }
+                    possibleMoves.AddRange(moves);
                 }
             }
+            return possibleMoves;
+        }
+
+        /* Find if spot next to enemy pieces are empty to jump over piece */
+        private List<StackPanel> CalculateJump(int rowIncrement, int colIncrement, int row, int col)
+        {
+
+            List<StackPanel> moves = new List<StackPanel>();
+            if (col + colIncrement >= 0 && col + colIncrement <= 7 && row + rowIncrement >= 0 && row + rowIncrement <= 7)
+            {
+                StackPanel panel = (StackPanel)GetGridElement(CheckersGrid, row + rowIncrement, col + colIncrement);
+                if (panel.Children.Count == 0) { 
+                    moves.Add(panel);
+                }
+                moves.AddRange(GetJumps(rowIncrement / 2, row + rowIncrement, col + colIncrement));
+            }
+            return moves;
         }
 
         /* Unhighlight all spots by removing the button in the spot and reset Highlighted list */
@@ -183,12 +286,11 @@ namespace Client
         {
             if (Highlighted == null)
                 return;
-            foreach (Point move in Highlighted)
+            foreach (StackPanel stackPanel in Highlighted)
             {
-                StackPanel stackPanel = (StackPanel)GetGridElement(CheckersGrid, (int)move.X, (int)move.Y);
                 stackPanel.Children.Clear();
             }
-            Highlighted = new List<Point>();
+            Highlighted = new List<StackPanel>();
         }
 
         /* Logic for when a highlighted square is selected */
@@ -205,6 +307,20 @@ namespace Client
             StackPanel newLocationPanel = (StackPanel)newLocation.Parent;
             int newRow = Grid.GetRow(newLocationPanel);
             int newCol = Grid.GetColumn(newLocationPanel);
+
+            List<StackPanel> captured = new List<StackPanel>();
+            Point newLoc = new Point(newRow, newCol);
+            foreach(KeyValuePair<Point,List<StackPanel>> entry in CaptureMoves){
+                if (entry.Key.Equals(newLoc))
+                {
+                    captured = entry.Value;
+                }
+            }
+            //MessageBox.Show(captured.Count.ToString());
+            foreach (StackPanel panel in captured)
+            {
+                panel.Children.Clear();
+            }
 
             //Unhighlight
             RemoveHighlight();
