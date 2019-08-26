@@ -24,7 +24,7 @@ namespace Client
         {
 
             InitializeComponent();
-            new CheckersBoard(CheckersGrid);
+            new Game(CheckersGrid);
         }
     }
 }

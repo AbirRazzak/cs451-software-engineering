@@ -28,12 +28,12 @@ namespace Client
             if (color == "Black")
             {
                 this.Color = "Black";
-                brush.ImageSource = new BitmapImage(new Uri("black.png", UriKind.Relative));
+                brush.ImageSource = new BitmapImage(new Uri("Icons/ablack.png", UriKind.Relative));
             }
             else
             {
                 this.Color = "Red";
-                brush.ImageSource = new BitmapImage(new Uri("red.png", UriKind.Relative));
+                brush.ImageSource = new BitmapImage(new Uri("Icons/ared.png", UriKind.Relative));
             }
 
             CurrentRow = row;
@@ -61,6 +61,16 @@ namespace Client
                     return e;
             }
             return null;
+        }
+
+        public void KingMe() {
+            this.IsKing = true;
+            var brush = new ImageBrush();
+            if (Color == "Black")
+                brush.ImageSource = new BitmapImage(new Uri("Icons/blackKing.png", UriKind.Relative));
+            else
+                brush.ImageSource = new BitmapImage(new Uri("Icons/redKing.png", UriKind.Relative));
+            PieceButton.Background = brush;
         }
     }
 }

@@ -7,7 +7,9 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="720" Width="800">
     <Grid>
-        <UniformGrid Height="480" Width="480" Rows="8" Columns="8" Name="CheckersGrid">
-        </UniformGrid>
+        <Border  HorizontalAlignment="Left" VerticalAlignment="Bottom"  BorderBrush="Black" BorderThickness="2" Margin="25 0 0 25">
+            <UniformGrid Height="480" Width="480" Rows="8" Columns="8" Name="CheckersGrid">
+            </UniformGrid>
+        </Border>
     </Grid>
 </Window>

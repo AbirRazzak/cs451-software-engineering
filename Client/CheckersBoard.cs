@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using System.Timers;
 
 namespace Client
 {
@@ -18,13 +22,24 @@ namespace Client
         public Piece SelectedPiece { get; set; }
         //Grid spaces that are highlighted when a piece is selected
         private List<StackPanel> Highlighted;
-
         private Dictionary<Point, List<StackPanel>> CaptureMoves;
+
+        private string CurrentTurn;
+        private string ClientColor;
+        private string ServerLink = "http://localhost:55555";
+        private string LatestMove;
+        private Timer MoveTimer;
 
         public CheckersBoard(UniformGrid checkersGrid)
         {
+            WebRequest webrequest = WebRequest.Create("http://localhost:55555/");
+            webrequest.Method = "GET";
+            WebResponse resp = webrequest.GetResponse();
+
             this.CheckersGrid = checkersGrid;
             Highlighted = new List<StackPanel>();
+            ClientColor = "Black";
+            CurrentTurn = "Black";
             MakeBoard();
         }
         /* Initalize the board by adding panels to the grid
@@ -68,15 +83,16 @@ namespace Client
             RemoveHighlight();
 
             //Get possible move locations for the slected piece
-            List<StackPanel> moves;
+            List<StackPanel> moves = new List<StackPanel>();
             SelectedPiece = GetPiece((Button)sender);
-            moves = GetPossibleMoves();
+            if (CurrentTurn == SelectedPiece.Color && CurrentTurn == ClientColor) 
+                moves = GetPossibleMoves();
 
             //Add a button to highlight the move location if there isn't a piece there already and bind it to Move function
             foreach (StackPanel stackPanel in moves)
             {
                 Button possibleMove = new Button();
-                possibleMove.Click += new RoutedEventHandler(Move);
+                possibleMove.Click += new RoutedEventHandler(MoveClick);
                 possibleMove.Height = 60;
                 possibleMove.Width = 60;
                 possibleMove.Background = Brushes.Yellow;
@@ -227,19 +243,29 @@ namespace Client
         }
 
         /* Logic for when a highlighted square is selected */
-        public void Move(Object sender, RoutedEventArgs e)
+        public void MoveClick(Object sender, RoutedEventArgs e)
         {
             //Remove the selected peice from the original location
             Button selected = SelectedPiece.PieceButton;
             StackPanel selectedPanel = (StackPanel)selected.Parent;
-            Piece piece = GetPiece(selected);
-            selectedPanel.Children.Remove(selected);
 
             //Retrieve new row and column for location to move to
             Button newLocation = (Button)sender;
             StackPanel newLocationPanel = (StackPanel)newLocation.Parent;
             int newRow = Grid.GetRow(newLocationPanel);
             int newCol = Grid.GetColumn(newLocationPanel);
+
+            SendMove(SelectedPiece.CurrentRow, SelectedPiece.CurrentCol, newRow, newCol);
+
+            Move(selectedPanel, newLocationPanel);
+        }
+        private void Move(StackPanel original, StackPanel newLocation) {
+            Button selected = (Button)original.Children[0];
+            Piece piece = GetPiece(selected);
+            original.Children.Clear();
+
+            int newRow = Grid.GetRow(newLocation);
+            int newCol = Grid.GetColumn(newLocation);
 
             List<StackPanel> captured = new List<StackPanel>();
             Point newLoc = new Point(newRow, newCol);
@@ -250,23 +276,78 @@ namespace Client
                     captured = entry.Value;
                 }
             }
-            //MessageBox.Show(captured.Count.ToString());
             foreach (StackPanel panel in captured)
             {
                 panel.Children.Clear();
             }
 
-            //Unhighlight
             RemoveHighlight();
 
             //Set the piece in the new location
-            newLocationPanel.Children.Add(selected);
+            newLocation.Children.Add(selected);
             piece.CurrentCol = newCol;
             piece.CurrentRow = newRow;
             if (newRow == 0 && piece.Color == "Black")
-                piece.IsKing = true;
+                piece.KingMe();
             else if (newRow == 7 && piece.Color == "Red")
-                piece.IsKing = true;
+                piece.KingMe();
+
+
+            SwitchTurn();
+        }
+        private void SendMove(int currentRow, int currentCol, int newRow, int newCol)
+        {
+            string move = "/" + currentRow + currentCol + "," + newRow + newCol;
+            LatestMove = "" + currentRow + currentCol + "," + newRow + newCol;
+            WebRequest wr = WebRequest.Create(ServerLink + "/move/abc" + move);
+            wr.Method = "POST";
+            wr.ContentLength = 0;
+            wr.GetResponse();
+        }
+
+        private void SwitchTurn()
+        {
+            if (SelectedPiece.Color == "Black")
+                CurrentTurn = "Red";
+            else
+                CurrentTurn = "Black";
+            if (CurrentTurn != ClientColor)
+            {
+                string move = LatestMove;
+                MoveTimer = new Timer(5000);
+                MoveTimer.Elapsed += getLatestMove;
+                MoveTimer.AutoReset = true;
+                MoveTimer.Enabled = true;
+            }
+        }
+
+        private void getLatestMove(Object Source, ElapsedEventArgs e)
+        {
+            WebRequest wr = WebRequest.Create(ServerLink + "/getlatestmove/abc");
+            wr.Method = "GET";
+            WebResponse resp = wr.GetResponse();
+            string move = LatestMove;
+            using (Stream dataStream = resp.GetResponseStream())
+            {
+                StreamReader reader = new StreamReader(dataStream);
+                move = reader.ReadToEnd();
+            }
+            if (!move.Equals(LatestMove)) {
+                MoveTimer.Stop();
+                MessageBox.Show(move + LatestMove);
+                MakeOpponentMove(move);
+            }
+        }
+
+        private void MakeOpponentMove(string move)
+        {
+            Application.Current.Dispatcher.Invoke(() => { 
+                StackPanel originalLocation = (StackPanel)GetGridElement((move[0] - '0'), (move[1] - '0'));
+                StackPanel newPanel = (StackPanel)GetGridElement((move[3] - '0'), (move[4] - '0'));
+                SelectedPiece = GetPiece((Button)originalLocation.Children[0]);
+                _ = GetPossibleMoves();
+                Move(originalLocation, newPanel);
+            });
         }
 
         /* Get the piece that a button represents by parsing the name of the button */
@@ -306,8 +387,8 @@ namespace Client
             BlackPieces = new Piece[12];
             RedPieces = new Piece[12];
 
-            RedPieces[0] = new Piece("Red", 0, 1, CheckersGrid, 0);
-            RedPieces[0].PieceButton.Click += new RoutedEventHandler(SelectPiece);
+            //RedPieces[0] = new Piece("Red", 0, 1, CheckersGrid, 0);
+            //RedPieces[0].PieceButton.Click += new RoutedEventHandler(SelectPiece);
             RedPieces[1] = new Piece("Red", 0, 3, CheckersGrid, 1);
             RedPieces[1].PieceButton.Click += new RoutedEventHandler(SelectPiece);
             RedPieces[2] = new Piece("Red", 0, 5, CheckersGrid, 2);
@@ -315,8 +396,8 @@ namespace Client
             RedPieces[3] = new Piece("Red", 0, 7, CheckersGrid, 3);
             RedPieces[3].PieceButton.Click += new RoutedEventHandler(SelectPiece);
 
-            RedPieces[4] = new Piece("Red", 1, 0, CheckersGrid, 4);
-            RedPieces[4].PieceButton.Click += new RoutedEventHandler(SelectPiece);
+            //RedPieces[4] = new Piece("Red", 1, 0, CheckersGrid, 4);
+            //RedPieces[4].PieceButton.Click += new RoutedEventHandler(SelectPiece);
             RedPieces[5] = new Piece("Red", 1, 2, CheckersGrid, 5);
             RedPieces[5].PieceButton.Click += new RoutedEventHandler(SelectPiece);
             RedPieces[6] = new Piece("Red", 1, 4, CheckersGrid, 6);
@@ -330,7 +411,8 @@ namespace Client
             RedPieces[9].PieceButton.Click += new RoutedEventHandler(SelectPiece);
             RedPieces[10] = new Piece("Red", 2, 5, CheckersGrid, 10);
             RedPieces[10].PieceButton.Click += new RoutedEventHandler(SelectPiece);
-            RedPieces[11] = new Piece("Red", 2, 7, CheckersGrid, 11);
+
+            RedPieces[11] = new Piece("Red", 6, 7, CheckersGrid, 11);
             RedPieces[11].PieceButton.Click += new RoutedEventHandler(SelectPiece);
 
             BlackPieces[0] = new Piece("Black", 5, 0, CheckersGrid, 0);
@@ -348,8 +430,8 @@ namespace Client
             BlackPieces[5].PieceButton.Click += new RoutedEventHandler(SelectPiece);
             BlackPieces[6] = new Piece("Black", 6, 5, CheckersGrid, 6);
             BlackPieces[6].PieceButton.Click += new RoutedEventHandler(SelectPiece);
-            BlackPieces[7] = new Piece("Black", 6, 7, CheckersGrid, 7);
-            BlackPieces[7].PieceButton.Click += new RoutedEventHandler(SelectPiece);
+            //BlackPieces[7] = new Piece("Black", 6, 7, CheckersGrid, 7);
+            //BlackPieces[7].PieceButton.Click += new RoutedEventHandler(SelectPiece);
 
             BlackPieces[8] = new Piece("Black", 7, 0, CheckersGrid, 8);
             BlackPieces[8].PieceButton.Click += new RoutedEventHandler(SelectPiece);
@@ -357,7 +439,8 @@ namespace Client
             BlackPieces[9].PieceButton.Click += new RoutedEventHandler(SelectPiece);
             BlackPieces[10] = new Piece("Black", 7, 4, CheckersGrid, 10);
             BlackPieces[10].PieceButton.Click += new RoutedEventHandler(SelectPiece);
-            BlackPieces[11] = new Piece("Black", 7, 6, CheckersGrid, 11);
+
+            BlackPieces[11] = new Piece("Black", 1, 0, CheckersGrid, 11);
             BlackPieces[11].PieceButton.Click += new RoutedEventHandler(SelectPiece);
 
         }
