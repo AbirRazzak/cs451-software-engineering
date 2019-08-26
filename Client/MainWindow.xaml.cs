@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -37,7 +38,7 @@ namespace Client
         //A piece on the grid is shown as a button textured from a picture of a checkers piece
         public Button piece { get; set; }
 
-        public Piece(string color, int row, int col, Grid CheckersGrid, int pieceNum)
+        public Piece(string color, int row, int col, UniformGrid CheckersGrid, int pieceNum)
         {
             var brush = new ImageBrush();
 
@@ -67,7 +68,7 @@ namespace Client
         }
 
         /* Gets the element on the grid at row r and col c */
-        UIElement GetGridElement(Grid g, int r, int c)
+        UIElement GetGridElement(UniformGrid g, int r, int c)
         {
             for (int i = 0; i < g.Children.Count; i++)
             {
@@ -101,14 +102,14 @@ namespace Client
     }
     public class CheckersBoard
     {
-        public Grid CheckersGrid { get; set; }
+        public UniformGrid CheckersGrid { get; set; }
         public Piece[] BlackPieces { get; set; }
         public Piece[] RedPieces { get; set; }
         public Piece SelectedPiece { get; set; }
         //Grid spaces that are highlighted when a piece is selected
         private List<Point> Highlighted;
 
-        public CheckersBoard(Grid checkersGrid)
+        public CheckersBoard(UniformGrid checkersGrid)
         {
             this.CheckersGrid = checkersGrid;
             MakeBoard();
@@ -234,7 +235,7 @@ namespace Client
         }
 
         /* Gets the element on the grid at row r and col c */
-        UIElement GetGridElement(Grid g, int r, int c)
+        UIElement GetGridElement(UniformGrid g, int r, int c)
         {
             for (int i = 0; i < g.Children.Count; i++)
             {

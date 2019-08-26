@@ -7,27 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="720" Width="800">
     <Grid>
-        <Grid Name="CheckersGrid">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="60"/>
-                <ColumnDefinition Width="60"/>
-                <ColumnDefinition Width="60"/>
-                <ColumnDefinition Width="60"/>
-                <ColumnDefinition Width="60"/>
-                <ColumnDefinition Width="60"/>
-                <ColumnDefinition Width="60"/>
-                <ColumnDefinition Width="60"/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="60"/>
-                <RowDefinition Height="60"/>
-                <RowDefinition Height="60"/>
-                <RowDefinition Height="60"/>
-                <RowDefinition Height="60"/>
-                <RowDefinition Height="60"/>
-                <RowDefinition Height="60"/>
-                <RowDefinition Height="60"/>
-            </Grid.RowDefinitions>
-        </Grid>
+        <UniformGrid Height="480" Width="480" Rows="8" Columns="8" Name="CheckersGrid">
+        </UniformGrid>
     </Grid>
 </Window>
