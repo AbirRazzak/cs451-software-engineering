@@ -22,7 +22,7 @@ namespace GameServer
             {
                 // Relay a move to the other player
                 var ip = Request.UserHostAddress;
-                Console.WriteLine("\nMessage signal sent to GameModule from IP: " + ip);
+                Console.WriteLine("\nMove signal sent to GameModule from IP: " + ip);
                 Console.WriteLine("\t\t Session ID: " + param.gameID);
                 Console.WriteLine("\t\t Move: " + param.move);
 
