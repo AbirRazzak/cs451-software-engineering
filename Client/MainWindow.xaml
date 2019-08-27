@@ -7,12 +7,13 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="720" Width="800">
     <Grid>
-        <ContentControl x:Name="GameGrid" Visibility="Collapsed">
+        <ContentControl x:Name="GameGrid">
             <Grid>
                 <Border BorderBrush="Black" BorderThickness="2" HorizontalAlignment="Left" VerticalAlignment="Top" Width="484" Margin="25,10,0,0" Height="106">
                     <Grid>
-                        <TextBlock HorizontalAlignment="Left" Margin="10,16,0,0" TextWrapping="Wrap" Text="Session Id:" VerticalAlignment="Top" Height="64" Width="115" FontSize="24"/>
+                        <TextBlock HorizontalAlignment="Left" Margin="10,16,0,0" TextWrapping="Wrap" Text="Session Id:" VerticalAlignment="Top" Height="32" Width="115" FontSize="24"/>
                         <TextBlock HorizontalAlignment="Left" Margin="130,16,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" FontSize="24" Name="Session"/>
+                        <TextBlock HorizontalAlignment="Left" Margin="10,60,0,0" TextWrapping="Wrap" Text="Your Pieces:" VerticalAlignment="Top" Height="32" Width="358" FontSize="24" Name="PlayerColor"/>
                     </Grid>
                 </Border>
                 <Border  HorizontalAlignment="Left" VerticalAlignment="Bottom"  BorderBrush="Black" BorderThickness="2" Margin="25 0 0 25">

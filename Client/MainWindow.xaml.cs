@@ -31,6 +31,7 @@ namespace Client
             GameGrid.Visibility = Visibility.Visible;
             string code = GenerateCode();
             Session.Text = code;
+            PlayerColor.Text += " Black";
             new Chat(ChatBox, ChatInput, SendButton, code);
             new CheckersBoard(CheckersGrid, "Black", code);
         }
@@ -53,9 +54,11 @@ namespace Client
             if (IdBox.Text.Length == 7) { 
                 StartButtons.Visibility = Visibility.Collapsed;
                 GameGrid.Visibility = Visibility.Visible;
-                new CheckersBoard(CheckersGrid, "Red", IdBox.Text);
+                PlayerColor.Text += " Red";
                 Session.Text = IdBox.Text;
                 new Chat(ChatBox, ChatInput, SendButton, IdBox.Text);
+                new CheckersBoard(CheckersGrid, "Red", IdBox.Text);
+                
             }
             
         }
