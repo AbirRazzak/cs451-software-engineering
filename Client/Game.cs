@@ -10,7 +10,7 @@ namespace Client
     class Game
     {
         public Game(UniformGrid checkersGrid) {
-            new CheckersBoard(checkersGrid);
+            //new CheckersBoard(checkersGrid);
         }
     }
 }

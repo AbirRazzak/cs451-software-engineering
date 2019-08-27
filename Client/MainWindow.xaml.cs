@@ -24,7 +24,22 @@ namespace Client
         {
 
             InitializeComponent();
-            new Game(CheckersGrid);
+            
+        }
+
+        private void HostButton_Click(object sender, RoutedEventArgs e)
+        {
+            StartButtons.Visibility = Visibility.Collapsed;
+            GameGrid.Visibility = Visibility.Visible;
+            new CheckersBoard(CheckersGrid, "Black");
+        }
+
+        private void JoinButton_Click(object sender, RoutedEventArgs e)
+        { 
+            StartButtons.Visibility = Visibility.Collapsed;
+            GameGrid.Visibility = Visibility.Visible;
+            new CheckersBoard(CheckersGrid, "Red");
+            
         }
     }
 }

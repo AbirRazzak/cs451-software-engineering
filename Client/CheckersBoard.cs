@@ -29,18 +29,47 @@ namespace Client
         private string ServerLink = "http://localhost:55555";
         private string LatestMove;
         private Timer MoveTimer;
+        private string gameID;
 
-        public CheckersBoard(UniformGrid checkersGrid)
+        public CheckersBoard(UniformGrid checkersGrid, string color)
         {
-            WebRequest webrequest = WebRequest.Create("http://localhost:55555/");
-            webrequest.Method = "GET";
-            WebResponse resp = webrequest.GetResponse();
-
-            this.CheckersGrid = checkersGrid;
+            gameID = "testing";
+            CheckersGrid = checkersGrid;
             Highlighted = new List<StackPanel>();
-            ClientColor = "Black";
+            CaptureMoves = new Dictionary<Point, List<StackPanel>>();
+            ClientColor = color;
             CurrentTurn = "Black";
             MakeBoard();
+            if(color == "Red")
+                StartRedTurn();
+        }
+
+        private void StartRedTurn()
+        {
+            string move = LatestMove;
+            MoveTimer = new Timer(5000);
+            MoveTimer.Elapsed += GetStartingMove;
+            MoveTimer.AutoReset = true;
+            MoveTimer.Enabled = true;
+        }
+
+        private void GetStartingMove(Object Source, ElapsedEventArgs e)
+        {
+            WebRequest wr = WebRequest.Create(ServerLink + "/getallmoves/" + gameID);
+            wr.Method = "GET";
+            WebResponse resp = wr.GetResponse();
+            string move = LatestMove;
+            using (Stream dataStream = resp.GetResponseStream())
+            {
+                StreamReader reader = new StreamReader(dataStream);
+                move = reader.ReadToEnd();
+            }
+            if (move.Length > 0) {
+                MoveTimer.Stop();
+                MoveTimer.Dispose();
+                MakeOpponentMove(move);
+            }
+                
         }
         /* Initalize the board by adding panels to the grid
          * Panels will hold the buttons that represent the pieces and the move locations
@@ -299,7 +328,7 @@ namespace Client
         {
             string move = "/" + currentRow + currentCol + "," + newRow + newCol;
             LatestMove = "" + currentRow + currentCol + "," + newRow + newCol;
-            WebRequest wr = WebRequest.Create(ServerLink + "/move/abc" + move);
+            WebRequest wr = WebRequest.Create(ServerLink + "/move/" + gameID + move);
             wr.Method = "POST";
             wr.ContentLength = 0;
             wr.GetResponse();
@@ -323,7 +352,7 @@ namespace Client
 
         private void getLatestMove(Object Source, ElapsedEventArgs e)
         {
-            WebRequest wr = WebRequest.Create(ServerLink + "/getlatestmove/abc");
+            WebRequest wr = WebRequest.Create(ServerLink + "/getlatestmove/" + gameID);
             wr.Method = "GET";
             WebResponse resp = wr.GetResponse();
             string move = LatestMove;
@@ -387,8 +416,8 @@ namespace Client
             BlackPieces = new Piece[12];
             RedPieces = new Piece[12];
 
-            //RedPieces[0] = new Piece("Red", 0, 1, CheckersGrid, 0);
-            //RedPieces[0].PieceButton.Click += new RoutedEventHandler(SelectPiece);
+            RedPieces[0] = new Piece("Red", 0, 1, CheckersGrid, 0);
+            RedPieces[0].PieceButton.Click += new RoutedEventHandler(SelectPiece);
             RedPieces[1] = new Piece("Red", 0, 3, CheckersGrid, 1);
             RedPieces[1].PieceButton.Click += new RoutedEventHandler(SelectPiece);
             RedPieces[2] = new Piece("Red", 0, 5, CheckersGrid, 2);
@@ -396,8 +425,8 @@ namespace Client
             RedPieces[3] = new Piece("Red", 0, 7, CheckersGrid, 3);
             RedPieces[3].PieceButton.Click += new RoutedEventHandler(SelectPiece);
 
-            //RedPieces[4] = new Piece("Red", 1, 0, CheckersGrid, 4);
-            //RedPieces[4].PieceButton.Click += new RoutedEventHandler(SelectPiece);
+            RedPieces[4] = new Piece("Red", 1, 0, CheckersGrid, 4);
+            RedPieces[4].PieceButton.Click += new RoutedEventHandler(SelectPiece);
             RedPieces[5] = new Piece("Red", 1, 2, CheckersGrid, 5);
             RedPieces[5].PieceButton.Click += new RoutedEventHandler(SelectPiece);
             RedPieces[6] = new Piece("Red", 1, 4, CheckersGrid, 6);
@@ -411,8 +440,7 @@ namespace Client
             RedPieces[9].PieceButton.Click += new RoutedEventHandler(SelectPiece);
             RedPieces[10] = new Piece("Red", 2, 5, CheckersGrid, 10);
             RedPieces[10].PieceButton.Click += new RoutedEventHandler(SelectPiece);
-
-            RedPieces[11] = new Piece("Red", 6, 7, CheckersGrid, 11);
+            RedPieces[11] = new Piece("Red", 2, 7, CheckersGrid, 11);
             RedPieces[11].PieceButton.Click += new RoutedEventHandler(SelectPiece);
 
             BlackPieces[0] = new Piece("Black", 5, 0, CheckersGrid, 0);
@@ -430,8 +458,8 @@ namespace Client
             BlackPieces[5].PieceButton.Click += new RoutedEventHandler(SelectPiece);
             BlackPieces[6] = new Piece("Black", 6, 5, CheckersGrid, 6);
             BlackPieces[6].PieceButton.Click += new RoutedEventHandler(SelectPiece);
-            //BlackPieces[7] = new Piece("Black", 6, 7, CheckersGrid, 7);
-            //BlackPieces[7].PieceButton.Click += new RoutedEventHandler(SelectPiece);
+            BlackPieces[7] = new Piece("Black", 6, 7, CheckersGrid, 7);
+            BlackPieces[7].PieceButton.Click += new RoutedEventHandler(SelectPiece);
 
             BlackPieces[8] = new Piece("Black", 7, 0, CheckersGrid, 8);
             BlackPieces[8].PieceButton.Click += new RoutedEventHandler(SelectPiece);
@@ -439,8 +467,7 @@ namespace Client
             BlackPieces[9].PieceButton.Click += new RoutedEventHandler(SelectPiece);
             BlackPieces[10] = new Piece("Black", 7, 4, CheckersGrid, 10);
             BlackPieces[10].PieceButton.Click += new RoutedEventHandler(SelectPiece);
-
-            BlackPieces[11] = new Piece("Black", 1, 0, CheckersGrid, 11);
+            BlackPieces[11] = new Piece("Black", 7, 6, CheckersGrid, 11);
             BlackPieces[11].PieceButton.Click += new RoutedEventHandler(SelectPiece);
 
         }

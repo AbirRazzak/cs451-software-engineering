@@ -7,9 +7,17 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="720" Width="800">
     <Grid>
-        <Border  HorizontalAlignment="Left" VerticalAlignment="Bottom"  BorderBrush="Black" BorderThickness="2" Margin="25 0 0 25">
-            <UniformGrid Height="480" Width="480" Rows="8" Columns="8" Name="CheckersGrid">
-            </UniformGrid>
-        </Border>
+        <ContentControl x:Name="GameGrid" Visibility="Collapsed">
+            <Border  HorizontalAlignment="Left" VerticalAlignment="Bottom"  BorderBrush="Black" BorderThickness="2" Margin="25 0 0 25">
+                <UniformGrid Height="480" Width="480" Rows="8" Columns="8" Name="CheckersGrid">
+                </UniformGrid>
+            </Border>
+        </ContentControl>
+        <ContentControl x:Name="StartButtons">
+            <Grid>
+                <Button x:Name="HostButton" Content="Host" HorizontalAlignment="Left" Margin="239,245,0,0" VerticalAlignment="Top" Width="387" Height="103" FontSize="72" Click="HostButton_Click"/>
+                <Button x:Name="JoinButton" Content="Join" HorizontalAlignment="Left" Margin="233,396,0,0" VerticalAlignment="Top" Width="393" Height="105" FontSize="72" Click="JoinButton_Click"/>
+            </Grid>
+        </ContentControl>
     </Grid>
 </Window>
