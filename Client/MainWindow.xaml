@@ -8,16 +8,30 @@
         Title="MainWindow" Height="720" Width="800">
     <Grid>
         <ContentControl x:Name="GameGrid" Visibility="Collapsed">
-            <Border  HorizontalAlignment="Left" VerticalAlignment="Bottom"  BorderBrush="Black" BorderThickness="2" Margin="25 0 0 25">
-                <UniformGrid Height="480" Width="480" Rows="8" Columns="8" Name="CheckersGrid">
-                </UniformGrid>
-            </Border>
+            <Grid>
+                <Border BorderBrush="Black" BorderThickness="2" HorizontalAlignment="Left" VerticalAlignment="Top" Width="484" Margin="25,10,0,0" Height="106">
+                    <Grid>
+                        <TextBlock HorizontalAlignment="Left" Margin="10,16,0,0" TextWrapping="Wrap" Text="Session Id:" VerticalAlignment="Top" Height="64" Width="115" FontSize="24"/>
+                        <TextBlock HorizontalAlignment="Left" Margin="130,16,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" FontSize="24" Name="Session"/>
+                    </Grid>
+                </Border>
+                <Border  HorizontalAlignment="Left" VerticalAlignment="Bottom"  BorderBrush="Black" BorderThickness="2" Margin="25 0 0 25">
+                    <UniformGrid Height="480" Width="480" Rows="8" Columns="8" Name="CheckersGrid">
+                    </UniformGrid>
+                </Border>
+                <TextBox HorizontalAlignment="Left" Height="601" Margin="536,10,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="220" FontSize="16" Name="ChatBox"/>
+                <Button Content="Send" HorizontalAlignment="Left" Margin="692,616,0,0" VerticalAlignment="Top" Width="64" Height="42" RenderTransformOrigin="0.292,0.478" FontSize="16" Name="SendButton"/>
+                <TextBox HorizontalAlignment="Left" Height="42" Margin="536,616,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="159" Name="ChatInput" FontSize="16"/>
+
+            </Grid>
         </ContentControl>
         <ContentControl x:Name="StartButtons">
             <Grid Margin="10,10,-10,-10">
                 <Button x:Name="HostButton" Content="Host" Width="393" Height="105" FontSize="72" Click="HostButton_Click" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="202,234,203,0"/>
                 <Button x:Name="JoinButton" Content="Join" HorizontalAlignment="Center" Margin="199,412,200,0" VerticalAlignment="Top" Width="393" Height="105" FontSize="72" Click="JoinButton_Click"/>
                 <TextBox HorizontalAlignment="Left" Height="105" Margin="199,95,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="393" FontSize="72" Name="IdBox"/>
+                
+
             </Grid>
         </ContentControl>
     </Grid>

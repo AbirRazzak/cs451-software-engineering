@@ -30,6 +30,8 @@ namespace Client
             StartButtons.Visibility = Visibility.Collapsed;
             GameGrid.Visibility = Visibility.Visible;
             string code = GenerateCode();
+            Session.Text = code;
+            new Chat(ChatBox, ChatInput, SendButton, code);
             new CheckersBoard(CheckersGrid, "Black", code);
         }
 
@@ -48,10 +50,12 @@ namespace Client
 
         private void JoinButton_Click(object sender, RoutedEventArgs e)
         {
-            if (IdBox.Text.Length != 7) { 
+            if (IdBox.Text.Length == 7) { 
                 StartButtons.Visibility = Visibility.Collapsed;
                 GameGrid.Visibility = Visibility.Visible;
                 new CheckersBoard(CheckersGrid, "Red", IdBox.Text);
+                Session.Text = IdBox.Text;
+                new Chat(ChatBox, ChatInput, SendButton, IdBox.Text);
             }
             
         }

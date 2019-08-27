@@ -26,7 +26,7 @@ namespace Client
 
         private string CurrentTurn;
         private string ClientColor;
-        private string ServerLink = "http://localhost:55555";
+        private string ServerLink = "http://192.168.0.182:55555/";
         private string LatestMove;
         private Timer MoveTimer;
         private string GameId;
@@ -48,7 +48,6 @@ namespace Client
 
         private void StartRedTurn()
         {
-            string move = LatestMove;
             MoveTimer = new Timer(5000);
             MoveTimer.Elapsed += GetStartingMove;
             MoveTimer.AutoReset = true;
@@ -57,6 +56,7 @@ namespace Client
 
         private void GetStartingMove(Object Source, ElapsedEventArgs e)
         {
+
             WebRequest wr = WebRequest.Create(ServerLink + "/getallmoves/" + GameId);
             wr.Method = "GET";
             WebResponse resp = wr.GetResponse();
@@ -293,15 +293,6 @@ namespace Client
             Move(selectedPanel, newLocationPanel);
         }
         private void Move(StackPanel original, StackPanel newLocation) {
-            //MessageBoxResult result = MessageBox.Show("Game Over. Do you want to play again?", "Game Over", MessageBoxButton.YesNo);
-            //if (result == MessageBoxResult.Yes)
-            //{
-            //    //reset board
-            //}
-            //else
-            //{
-            //    Application.Current.Shutdown();
-            //}
             Button selected = (Button)original.Children[0];
             Piece piece = GetPiece(selected);
             original.Children.Clear();
@@ -320,6 +311,10 @@ namespace Client
             }
             foreach (StackPanel panel in captured)
             {
+                if (SelectedPiece.Color == "Black")
+                    RedPiecesLeft--;
+                else
+                    BlackPiecesLeft--;
                 panel.Children.Clear();
             }
 
@@ -333,6 +328,33 @@ namespace Client
                 piece.KingMe();
             else if (newRow == 7 && piece.Color == "Red")
                 piece.KingMe();
+
+            string message = "";
+            if (RedPiecesLeft == 0)
+            {
+                if (ClientColor == "Red")
+                    message = "You Lose! Do you want to play again?";
+                else
+                    message = "You Win! Do you want to play again?";
+            }
+            else if (BlackPiecesLeft == 0)
+            {
+                if (ClientColor == "Black")
+                    message = "You Lose! Do you want to play again?";
+                else
+                    message = "You Win! Do you want to play again?";
+            }
+            if (message != "") {
+                MessageBoxResult result = MessageBox.Show(message, "Game Over", MessageBoxButton.YesNo);
+                if (result == MessageBoxResult.Yes)
+                {
+                    //reset board
+                }
+                else
+                {
+                    Application.Current.Shutdown();
+                }
+            }
 
 
             SwitchTurn();
@@ -356,7 +378,7 @@ namespace Client
             if (CurrentTurn != ClientColor)
             {
                 string move = LatestMove;
-                MoveTimer = new Timer(5000);
+                MoveTimer = new Timer(7000);
                 MoveTimer.Elapsed += getLatestMove;
                 MoveTimer.AutoReset = true;
                 MoveTimer.Enabled = true;
@@ -378,7 +400,6 @@ namespace Client
             }
             if (!move.Equals(LatestMove)) {
                 MoveTimer.Stop();
-                MessageBox.Show(move + LatestMove);
                 MakeOpponentMove(move);
             }
         }
@@ -430,7 +451,9 @@ namespace Client
         public void MakePieces()
         {
             BlackPieces = new Piece[12];
+            BlackPiecesLeft = 12;
             RedPieces = new Piece[12];
+            RedPiecesLeft = 12;
 
             RedPieces[0] = new Piece("Red", 0, 1, CheckersGrid, 0);
             RedPieces[0].PieceButton.Click += new RoutedEventHandler(SelectPiece);
