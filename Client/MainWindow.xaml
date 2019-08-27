@@ -27,12 +27,17 @@
         </ContentControl>
         <ContentControl x:Name="StartButtons">
             <Grid Margin="10,10,-10,-10">
-                <Button x:Name="HostButton" Content="Host" Width="393" Height="105" FontSize="72" Click="HostButton_Click" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="202,234,203,0"/>
-                <Button x:Name="JoinButton" Content="Join" HorizontalAlignment="Center" Margin="199,412,200,0" VerticalAlignment="Top" Width="393" Height="105" FontSize="72" Click="JoinButton_Click"/>
-                <TextBox HorizontalAlignment="Left" Height="105" Margin="199,95,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="393" FontSize="72" Name="IdBox"/>
-                
+                <Button x:Name="HostButton" Content="Host" Width="393" Height="105" FontSize="72" Click="HostButton_Click" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="199,350,200,0"/>
+                <Button x:Name="JoinButton" Content="Join" HorizontalAlignment="Center" Margin="199,500,200,0" VerticalAlignment="Top" Width="393" Height="105" FontSize="72" Click="JoinButton_Click"/>
+                <TextBox HorizontalAlignment="Left" Height="105" Margin="199,197,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="393" FontSize="72" Name="IdBox"/>
+                <TextBlock HorizontalAlignment="Left" Margin="196,10,0,0" TextWrapping="Wrap" Text="Checkers" VerticalAlignment="Top" FontSize="100"/>
+                <TextBlock HorizontalAlignment="Left" Margin="212,127,0,0" TextWrapping="Wrap" Text="Click host to start game or enter lobby Id in the textbox and click join to join a friend!" VerticalAlignment="Top" FontSize="15
+                           " Height="49" Width="380" TextAlignment="Center"/>
+
 
             </Grid>
         </ContentControl>
+        <TextBlock HorizontalAlignment="Left" Margin="741,10,0,0" TextWrapping="Wrap" Text="Version: 1.0" VerticalAlignment="Top" FontSize="8"/>
+
     </Grid>
 </Window>
