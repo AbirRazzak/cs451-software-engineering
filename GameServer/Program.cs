@@ -12,7 +12,12 @@ namespace GameServer
         {
             String consoleInput;
             var uri = new Uri("http://localhost:55555/");
-            var config = new HostConfiguration { RewriteLocalhost = true };
+            var config = new HostConfiguration
+            {
+                // This makes it so that we don't have to manually reserve the URL on windows
+                UrlReservations = new UrlReservations() { CreateAutomatically = true },
+                RewriteLocalhost = true
+            };
             var startupMessage = new StringBuilder("Running on ");
             startupMessage.AppendFormat("{0}. Use {1} to shut down the server.", uri.ToString(), exitCode);
             var host = new NancyHost(config, uri);

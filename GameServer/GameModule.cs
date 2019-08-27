@@ -41,7 +41,7 @@ namespace GameServer
                 moves.Add(param.move);
 
                 FileHandler.SaveGameFile(param.gameID, latestMsg, moves);
-                return "Move Sent.";
+                return "Move sent.";
             };
 
             Get["/getlatestmove/{gameID}"] = param =>
