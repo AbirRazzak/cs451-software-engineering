@@ -29,11 +29,13 @@ namespace Client
         private string ServerLink = "http://localhost:55555";
         private string LatestMove;
         private Timer MoveTimer;
-        private string gameID;
+        private string GameId;
+        private int RedPiecesLeft;
+        private int BlackPiecesLeft;
 
-        public CheckersBoard(UniformGrid checkersGrid, string color)
+        public CheckersBoard(UniformGrid checkersGrid, string color, string code)
         {
-            gameID = "testing";
+            GameId = code;
             CheckersGrid = checkersGrid;
             Highlighted = new List<StackPanel>();
             CaptureMoves = new Dictionary<Point, List<StackPanel>>();
@@ -55,7 +57,7 @@ namespace Client
 
         private void GetStartingMove(Object Source, ElapsedEventArgs e)
         {
-            WebRequest wr = WebRequest.Create(ServerLink + "/getallmoves/" + gameID);
+            WebRequest wr = WebRequest.Create(ServerLink + "/getallmoves/" + GameId);
             wr.Method = "GET";
             WebResponse resp = wr.GetResponse();
             string move = LatestMove;
@@ -63,6 +65,8 @@ namespace Client
             {
                 StreamReader reader = new StreamReader(dataStream);
                 move = reader.ReadToEnd();
+                reader.Close();
+                reader.Dispose();
             }
             if (move.Length > 0) {
                 MoveTimer.Stop();
@@ -289,6 +293,15 @@ namespace Client
             Move(selectedPanel, newLocationPanel);
         }
         private void Move(StackPanel original, StackPanel newLocation) {
+            //MessageBoxResult result = MessageBox.Show("Game Over. Do you want to play again?", "Game Over", MessageBoxButton.YesNo);
+            //if (result == MessageBoxResult.Yes)
+            //{
+            //    //reset board
+            //}
+            //else
+            //{
+            //    Application.Current.Shutdown();
+            //}
             Button selected = (Button)original.Children[0];
             Piece piece = GetPiece(selected);
             original.Children.Clear();
@@ -328,7 +341,7 @@ namespace Client
         {
             string move = "/" + currentRow + currentCol + "," + newRow + newCol;
             LatestMove = "" + currentRow + currentCol + "," + newRow + newCol;
-            WebRequest wr = WebRequest.Create(ServerLink + "/move/" + gameID + move);
+            WebRequest wr = WebRequest.Create(ServerLink + "/move/" + GameId + move);
             wr.Method = "POST";
             wr.ContentLength = 0;
             wr.GetResponse();
@@ -352,7 +365,7 @@ namespace Client
 
         private void getLatestMove(Object Source, ElapsedEventArgs e)
         {
-            WebRequest wr = WebRequest.Create(ServerLink + "/getlatestmove/" + gameID);
+            WebRequest wr = WebRequest.Create(ServerLink + "/getlatestmove/" + GameId);
             wr.Method = "GET";
             WebResponse resp = wr.GetResponse();
             string move = LatestMove;
@@ -360,6 +373,8 @@ namespace Client
             {
                 StreamReader reader = new StreamReader(dataStream);
                 move = reader.ReadToEnd();
+                reader.Close();
+                reader.Dispose();
             }
             if (!move.Equals(LatestMove)) {
                 MoveTimer.Stop();
@@ -408,6 +423,7 @@ namespace Client
                     return e;
             }
             return null;
+            
         }
 
         /* Set up the pieces on the board */

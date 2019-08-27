@@ -14,9 +14,10 @@
             </Border>
         </ContentControl>
         <ContentControl x:Name="StartButtons">
-            <Grid>
-                <Button x:Name="HostButton" Content="Host" HorizontalAlignment="Left" Margin="239,245,0,0" VerticalAlignment="Top" Width="387" Height="103" FontSize="72" Click="HostButton_Click"/>
-                <Button x:Name="JoinButton" Content="Join" HorizontalAlignment="Left" Margin="233,396,0,0" VerticalAlignment="Top" Width="393" Height="105" FontSize="72" Click="JoinButton_Click"/>
+            <Grid Margin="10,10,-10,-10">
+                <Button x:Name="HostButton" Content="Host" Width="393" Height="105" FontSize="72" Click="HostButton_Click" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="202,234,203,0"/>
+                <Button x:Name="JoinButton" Content="Join" HorizontalAlignment="Center" Margin="199,412,200,0" VerticalAlignment="Top" Width="393" Height="105" FontSize="72" Click="JoinButton_Click"/>
+                <TextBox HorizontalAlignment="Left" Height="105" Margin="199,95,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="393" FontSize="72" Name="IdBox"/>
             </Grid>
         </ContentControl>
     </Grid>

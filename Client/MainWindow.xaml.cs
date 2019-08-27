@@ -22,23 +22,37 @@ namespace Client
     {
         public MainWindow()
         {
-
             InitializeComponent();
-            
         }
 
         private void HostButton_Click(object sender, RoutedEventArgs e)
         {
             StartButtons.Visibility = Visibility.Collapsed;
             GameGrid.Visibility = Visibility.Visible;
-            new CheckersBoard(CheckersGrid, "Black");
+            string code = GenerateCode();
+            new CheckersBoard(CheckersGrid, "Black", code);
+        }
+
+        private string GenerateCode()
+        {
+            StringBuilder builder = new StringBuilder();
+            Random random = new Random();
+            char ch;
+            for (int i = 0; i < 7; i++)
+            {
+                ch = Convert.ToChar(Convert.ToInt32(Math.Floor(26 * random.NextDouble() + 65)));
+                builder.Append(ch);
+            }
+            return builder.ToString();
         }
 
         private void JoinButton_Click(object sender, RoutedEventArgs e)
-        { 
-            StartButtons.Visibility = Visibility.Collapsed;
-            GameGrid.Visibility = Visibility.Visible;
-            new CheckersBoard(CheckersGrid, "Red");
+        {
+            if (IdBox.Text.Length != 7) { 
+                StartButtons.Visibility = Visibility.Collapsed;
+                GameGrid.Visibility = Visibility.Visible;
+                new CheckersBoard(CheckersGrid, "Red", IdBox.Text);
+            }
             
         }
     }
