@@ -41,6 +41,7 @@ namespace Client
             CaptureMoves = new Dictionary<Point, List<StackPanel>>();
             ClientColor = color;
             CurrentTurn = "Black";
+            ServerLink = Environment.GetEnvironmentVariable("CheckersServer");
             MakeBoard();
             if(color == "Red")
                 StartRedTurn();
@@ -293,6 +294,7 @@ namespace Client
             Move(selectedPanel, newLocationPanel);
         }
         private void Move(StackPanel original, StackPanel newLocation) {
+
             Button selected = (Button)original.Children[0];
             Piece piece = GetPiece(selected);
             original.Children.Clear();
@@ -348,7 +350,8 @@ namespace Client
                 MessageBoxResult result = MessageBox.Show(message, "Game Over", MessageBoxButton.YesNo);
                 if (result == MessageBoxResult.Yes)
                 {
-                    //reset board
+                    ResetBoard();
+                    return;
                 }
                 else
                 {
@@ -358,6 +361,21 @@ namespace Client
 
 
             SwitchTurn();
+        }
+        private void ResetBoard()
+        {
+            if (MoveTimer != null)
+            {
+                MoveTimer.Stop();
+                MoveTimer.Dispose();
+            }
+            CheckersGrid.Children.Clear();
+            Highlighted = new List<StackPanel>();
+            CaptureMoves = new Dictionary<Point, List<StackPanel>>();
+            CurrentTurn = "Black";
+            MakeBoard();
+            if (ClientColor == "Red")
+                StartRedTurn();
         }
         private void SendMove(int currentRow, int currentCol, int newRow, int newCol)
         {

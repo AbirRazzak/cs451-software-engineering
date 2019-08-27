@@ -26,9 +26,9 @@ namespace Client
             ChatInput = chatInput;
             SendButton = sendButton;
             SendButton.Click += SendMessage;
-            ServerEndpoint = "http://localhost:55555";
+            //ServerEndpoint = "http://localhost:55555";
             GameId = gameId;
-            //ServerEndpoint = Environment.GetEnvironmentVariable("CheckersServer");
+            ServerEndpoint = Environment.GetEnvironmentVariable("CheckersServer");
             StartGettingMessages();
         }
 
